@@ -22,12 +22,12 @@ namespace WinFormsApp1
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            // KROK 1: Najpierw ustaw flagę, żeby zablokować nowe operacje
+            //  flaga do zablokowania nowych operacji
             isClosing = true;
 
             try
             {
-                // KROK 2: Anuluj wszystkie oczekujące edycje PRZED zamknięciem kontekstu
+                // Anulowanie wszystkich oczekujacych edycji przed zamknięciem kontekstu
                 if (dataGridView1 != null)
                 {
                     // Zakończ tryb edycji bez zapisywania zmian
@@ -37,19 +37,19 @@ namespace WinFormsApp1
                     dataGridView1.DataSource = null;
                 }
 
-                // KROK 3: Teraz bezpiecznie zamknij kontekst bazy danych
+                //bezpieczne zamkniecie kontekstu bazy danych
                 if (db != null)
                 {
                     db.Dispose();
-                    db = null; // Ustaw na null, żeby uniknąć przypadkowego użycia
+                    db = null; //  null, by uniknąć przypadkowego użycia
                 }
             }
             catch (Exception ex)
             {
-                // Loguj błąd, ale pozwól na zamknięcie formularza
+                // logowanie z mozliwoscia na zamknięcie formularza
                 System.Diagnostics.Debug.WriteLine($"Błąd przy zamykaniu: {ex.Message}");
 
-                // W przypadku błędu, wymuś zamknięcie kontekstu
+                // błąd, zamknięcie kontekstu
                 try
                 {
                     db?.Dispose();
@@ -57,12 +57,10 @@ namespace WinFormsApp1
                 }
                 catch
                 {
-                    // Ignoruj błędy przy wymuszonym zamykaniu
+                    // Ignorowanie błędow przy wymuszonym zamykaniu
                 }
             }
         }
-
-    
 
         private bool isLoading = false;
 
@@ -70,7 +68,7 @@ namespace WinFormsApp1
         {
             isLoading = true;
 
-            // Wyczyść wszystkie ślady poprzednich operacji
+            // czyszczenie wszystkich śladow poprzednich operacji
             db.ChangeTracker.Clear();
 
             dataGridView1.ReadOnly = false;
@@ -79,7 +77,7 @@ namespace WinFormsApp1
 
             db.Database.EnsureCreated();
 
-            // Załaduj dane BEZ trackingu
+            // ladowane dane bez trackingu
             var pizze = db.pizze.AsNoTracking().ToList();
             pizzaList = new BindingList<Pizza>(pizze);
             dataGridView1.DataSource = pizzaList;
@@ -94,24 +92,35 @@ namespace WinFormsApp1
 
             isLoading = false;
         }
-
-
-
         private void dataGridView1_CellValidating(object sender, DataGridViewCellValidatingEventArgs e)
         {
-
             if (dataGridView1.Rows[e.RowIndex].IsNewRow)
                 return;
 
             string columnName = dataGridView1.Columns[e.ColumnIndex].Name;
             string value = e.FormattedValue?.ToString();
 
-
+            // Walidacja nazwy pizzy - nie pusta, minimum 3 znaki, maksimum 50 znaków
             if (columnName == "Nazwa")
             {
-                if (string.IsNullOrWhiteSpace(value) || value.Length < 3)
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    dataGridView1.Rows[e.RowIndex].ErrorText = "Nazwa nie może być pusta!";
+                    e.Cancel = true;
+                }
+                else if (value.Length < 3)
                 {
                     dataGridView1.Rows[e.RowIndex].ErrorText = "Nazwa musi mieć co najmniej 3 znaki!";
+                    e.Cancel = true;
+                }
+                else if (value.Length > 50)
+                {
+                    dataGridView1.Rows[e.RowIndex].ErrorText = "Nazwa nie może być dłuższa niż 50 znaków!";
+                    e.Cancel = true;
+                }
+                else if (value.Any(char.IsDigit))
+                {
+                    dataGridView1.Rows[e.RowIndex].ErrorText = "Nazwa nie może zawierać cyfr!";
                     e.Cancel = true;
                 }
                 else
@@ -120,12 +129,93 @@ namespace WinFormsApp1
                 }
             }
 
+            // Walidacja składników - nie puste, minimum 5 znaków
+            if (columnName == "Skladniki")
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    dataGridView1.Rows[e.RowIndex].ErrorText = "Składniki nie mogą być puste!";
+                    e.Cancel = true;
+                }
+                else if (value.Length < 5)
+                {
+                    dataGridView1.Rows[e.RowIndex].ErrorText = "Składniki muszą mieć co najmniej 5 znaków!";
+                    e.Cancel = true;
+                }
+                else if (value.Length > 200)
+                {
+                    dataGridView1.Rows[e.RowIndex].ErrorText = "Składniki nie mogą być dłuższe niż 200 znaków!";
+                    e.Cancel = true;
+                }
+                else if (value.Any(char.IsDigit))
+                {
+                    dataGridView1.Rows[e.RowIndex].ErrorText = "Składniki nie mogą zawierać cyfr!";
+                    e.Cancel = true;
+                }
+                else if (!value.Contains(","))
+                {
+                    dataGridView1.Rows[e.RowIndex].ErrorText = "Składniki muszą być oddzielone przecinkami (np. ser, szynka, pieczarki)!";
+                    e.Cancel = true;
+                }
+                else
+                {
+                    // Sprawdź czy każdy składnik ma odpowiednią długość
+                    var skladniki = value.Split(',').Select(s => s.Trim()).ToArray();
 
+                    if (skladniki.Any(s => string.IsNullOrWhiteSpace(s)))
+                    {
+                        dataGridView1.Rows[e.RowIndex].ErrorText = "Każdy składnik musi mieć nazwę (usuń puste pozycje)!";
+                        e.Cancel = true;
+                    }
+                    else if (skladniki.Any(s => s.Length < 2))
+                    {
+                        dataGridView1.Rows[e.RowIndex].ErrorText = "Każdy składnik musi mieć co najmniej 2 znaki!";
+                        e.Cancel = true;
+                    }
+                    else if (skladniki.Length < 2)
+                    {
+                        dataGridView1.Rows[e.RowIndex].ErrorText = "Musi być co najmniej 2 składniki oddzielone przecinkami!";
+                        e.Cancel = true;
+                    }
+                    else if (skladniki.Any(s => s.Any(char.IsDigit)))
+                    {
+                        dataGridView1.Rows[e.RowIndex].ErrorText = "Nazwy składników nie mogą zawierać cyfr!";
+                        e.Cancel = true;
+                    }
+                    else
+                    {
+                        dataGridView1.Rows[e.RowIndex].ErrorText = "";
+                    }
+                }
+            }
+
+
+            // Walidacja ceny - musi być liczbą dodatnią w przedziale 1-999
             if (columnName == "cena")
             {
-                if (!decimal.TryParse(value, out decimal cena) || cena <= 0)
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    dataGridView1.Rows[e.RowIndex].ErrorText = "Cena nie może być pusta!";
+                    e.Cancel = true;
+                }
+                else if (!decimal.TryParse(value, out decimal cena))
+                {
+                    dataGridView1.Rows[e.RowIndex].ErrorText = "Cena musi być liczbą!";
+                    e.Cancel = true;
+                }
+                else if (cena <= 0)
                 {
                     dataGridView1.Rows[e.RowIndex].ErrorText = "Cena musi być liczbą dodatnią!";
+                    e.Cancel = true;
+                }
+                else if (cena > 999)
+                {
+                    dataGridView1.Rows[e.RowIndex].ErrorText = "Cena nie może być większa niż 999 zł!";
+                    e.Cancel = true;
+                }
+                else if (cena < 1)
+                {
+                    dataGridView1.Rows[e.RowIndex].ErrorText = "Cena nie może być mniejsza niż 1 zł!";
                     e.Cancel = true;
                 }
                 else
@@ -134,6 +224,7 @@ namespace WinFormsApp1
                 }
             }
         }
+
         private bool IsDbContextAvailable()
         {
             return db != null && !isClosing;
@@ -161,11 +252,11 @@ namespace WinFormsApp1
                     return;
                 }
 
-                // DODATKOWE ZABEZPIECZENIE przed sprawdzaniem IsNewRow
+                // dodatkowe zabezpiecznie przed sprawdzaniem IsNewRow
                 if (row == null || row.Cells == null || row.Cells.Count == 0)
                     return;
 
-                // Sprawdź IsNewRow w try-catch
+                // IsNewRow w try-catch
                 bool isNewRow;
                 try
                 {
@@ -173,13 +264,13 @@ namespace WinFormsApp1
                 }
                 catch
                 {
-                    return; // Jeśli IsNewRow rzuca wyjątek, wyjdź
+                    return; //  IsNewRow rzuca wyjątek, wyjdź
                 }
 
                 if (isNewRow)
                     return;
 
-                // Sprawdź DataBoundItem w try-catch
+                //  DataBoundItem w try-catch
                 object dataBoundItem;
                 try
                 {
@@ -187,7 +278,7 @@ namespace WinFormsApp1
                 }
                 catch
                 {
-                    return; // Jeśli DataBoundItem rzuca wyjątek, wyjdź
+                    return; // DataBoundItem rzuca wyjątek, wyjdź
                 }
 
                 if (dataBoundItem == null)
@@ -233,14 +324,10 @@ namespace WinFormsApp1
             }
             catch (Exception)
             {
-                // Globalny catch dla całej funkcji - jeśli cokolwiek pójdzie nie tak, po prostu wyjdź
+                // Globalny catch dla całej funkcji blad, po prostu wyjdź
                 return;
             }
         }
-
-
-
-
         private void dataGridView1_CellMouseDown(object sender, DataGridViewCellMouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right && e.RowIndex >= 0 && e.ColumnIndex >= 0)
@@ -250,6 +337,7 @@ namespace WinFormsApp1
                 dataGridView1.CurrentCell = dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex];
             }
         }
+
         private void usunToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (dataGridView1.SelectedRows.Count > 0)
@@ -274,7 +362,7 @@ namespace WinFormsApp1
                                     "Nie można usunąć",
                                     MessageBoxButtons.OK,
                                     MessageBoxIcon.Warning);
-                                return; // Nie usuwaj pizzy
+                                return; 
                             }
                         }
 
@@ -304,8 +392,6 @@ namespace WinFormsApp1
                 }
             }
         }
-
-
 
         private void button1_Click(object sender, EventArgs e)
         {

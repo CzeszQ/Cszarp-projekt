@@ -12,17 +12,19 @@ namespace WinFormsApp1
 {
     public partial class Form2 : Form
     {
+
         public Form2()
         {
             InitializeComponent();
         }
 
+
         private void zamowieniaButton_Click(object sender, EventArgs e)
         {
             Form3 form3 = new Form3();
-            this.Hide(); // ukrywa obecny formularz
-            form3.ShowDialog(); // otwiera nowy formularz modalnie
-            this.Show(); // po zamknięciu Form3 wraca do obecnego
+            this.Hide(); 
+            form3.ShowDialog(); 
+            this.Show(); 
         }
 
         private void asortymentButton_Click(object sender, EventArgs e)

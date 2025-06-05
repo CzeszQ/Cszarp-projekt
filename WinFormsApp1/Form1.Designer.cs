@@ -55,7 +55,6 @@
             dataGridView1.TabIndex = 0;
             dataGridView1.CellMouseDown += dataGridView1_CellMouseDown;
             dataGridView1.CellValidating += dataGridView1_CellValidating;
-            
             dataGridView1.RowValidating += dataGridView1_RowValidating;
             dataGridView1.ContextMenuStripChanged += usunToolStripMenuItem_Click;
             // 
@@ -84,15 +83,16 @@
             // 
             // contextMenuStrip1
             // 
+            contextMenuStrip1.AccessibleName = "usuń";
             contextMenuStrip1.Items.AddRange(new ToolStripItem[] { usun });
             contextMenuStrip1.Name = "contextMenuStrip1";
-            contextMenuStrip1.Size = new Size(181, 26);
+            contextMenuStrip1.Size = new Size(181, 48);
             // 
             // usun
             // 
             usun.Name = "usun";
             usun.Size = new Size(180, 22);
-            usun.Text = "toolStripMenuItem1";
+            usun.Text = "usuń";
             usun.Click += usunToolStripMenuItem_Click;
             // 
             // exit

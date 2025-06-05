@@ -32,3 +32,4 @@ D:\zadania\C#\WinFormsApp1\WinFormsApp1\bin\Debug\net9.0-windows\Npgsql.dll
 D:\zadania\C#\WinFormsApp1\WinFormsApp1\bin\Debug\net9.0-windows\Npgsql.EntityFrameworkCore.PostgreSQL.dll
 D:\zadania\C#\WinFormsApp1\WinFormsApp1\obj\Debug\net9.0-windows\WinForms.E4050A35.Up2Date
 D:\zadania\C#\WinFormsApp1\WinFormsApp1\obj\Debug\net9.0-windows\WinFormsApp1.Form3.resources
+D:\zadania\C#\WinFormsApp1\WinFormsApp1\obj\Debug\net9.0-windows\WinFormsApp1.sourcelink.json
