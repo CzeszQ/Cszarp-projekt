@@ -1,3 +1,60 @@
+# 🍕 System Zarządzania Pizzerią 🍕
+
+## Opis Aplikacji
+
+System Zarządzania Pizzerią to aplikacja desktopowa napisana w C# z wykorzystaniem Windows Forms i Entity Framework Core. Aplikacja umożliwia kompleksowe zarządzanie pizzerią, w tym obsługę menu pizz oraz zamówień klientów.
+
+### Główne funkcjonalności:
+
+- **Zarządzanie pizzami**: dodawanie, edycja, usuwanie pizz z menu
+- **Zarządzanie zamówieniami**: przyjmowanie, edycja i śledzenie statusu zamówień
+- **Walidacja danych**: kompleksowa walidacja wprowadzanych danych
+- **Intuicyjny interfejs**: przyjazny interfejs użytkownika z DataGridView
+- **Relacyjna baza danych**: wykorzystanie PostgreSQL z relacjami między tabelami
+
+### Technologie użyte:
+
+- **C# .NET** - język programowania
+- **Windows Forms** - interfejs użytkownika
+- **Entity Framework Core** - ORM do obsługi bazy danych
+- **PostgreSQL** - system zarządzania bazą danych
+- **Npgsql** - dostawca PostgreSQL dla .NET
+
+## Opis Bazy Danych
+
+Aplikacja wykorzystuje relacyjną bazę danych PostgreSQL składającą się z dwóch głównych tabel:
+
+### Tabela `pizze`
+
+CREATE TABLE pizze (
+id SERIAL PRIMARY KEY,
+nazwa VARCHAR(100) NOT NULL,
+skladniki TEXT,
+cena NUMERIC(10,2) NOT NULL
+);
+
+text
+
+**Pola:**
+- `id` - unikalny identyfikator pizzy (klucz główny)
+- `nazwa` - nazwa pizzy (wymagane, max 100 znaków)
+- `skladniki` - lista składników oddzielonych przecinkami
+- `cena` - cena pizzy (format: 10,2)
+
+### Tabela `zamowienia`
+
+CREATE TABLE zamowienia (
+id SERIAL PRIMARY KEY,
+imieklienta VARCHAR(100) NOT NULL,
+numertelefonu VARCHAR(20),
+pizzaid INTEGER NOT NULL,
+datazamowienia TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+status VARCHAR(50) NOT NULL DEFAULT 'nowe',
+FOREIGN KEY (pizzaid) REFERENCES pizze(id)
+);
+
+text
+
 **Pola:**
 - `id` - unikalny identyfikator zamówienia (klucz główny)
 - `imieklienta` - imię i nazwisko klienta (wymagane)
@@ -15,7 +72,7 @@
 
 - **System operacyjny**: Windows 10/11
 - **.NET Framework**: .NET 6.0 lub nowszy
-- **PostgreSQL**: wersja 12 lub nowsza
+- **PostgreSQL**: wersja 14 lub nowsza
 - **Visual Studio**: 2022 lub nowszy (dla developmentu)
 
 ### Instalacja PostgreSQL:
@@ -35,9 +92,7 @@ text
 
 2. **Wykonaj skrypt tworzący tabele:**
 - Otwórz plik `pizzeria_baza.sql`
-- Wykonaj skrypt w pgAdmin lub przez psql:
-
-psql -U postgres -d pizzeriadb -f pizzeria_baza.sql
+- Wykonaj skrypt w pgAdmin 
 
 text
 
